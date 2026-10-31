@@ -1,0 +1,30 @@
+{
+    "repository": "ehkhokhar154-beep/assignment-submission-portal",
+    "branch": "main",
+    "commit_sha": "172518a0abaad36c55295c0d4a8cb6fc381ca670",
+    "run_id": "41227047674",
+    "timestamp": 1793470529.671404,
+    "summary": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "status": "SUCCESS"
+    },
+    "tests": [
+        {
+            "name": "tests/test_app.py::test_valid_submission",
+            "result": "passed",
+            "message": ""
+        },
+        {
+            "name": "tests/test_app.py::test_missing_reg_number",
+            "result": "passed",
+            "message": ""
+        },
+        {
+            "name": "tests/test_app.py::test_invalid_url",
+            "result": "passed",
+            "message": ""
+        }
+    ]
+}
