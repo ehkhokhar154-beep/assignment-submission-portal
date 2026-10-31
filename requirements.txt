@@ -1,0 +1,5 @@
+flask
+pytest
+requests
+urllib3
+pytest-json-report
