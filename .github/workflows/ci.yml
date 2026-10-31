@@ -27,42 +27,11 @@ jobs:
       continue-on-error: true
       run: |
         pip install pytest-json-report
-        pytest --json-report --json-report-file=report.json
+        pytest --json-report --json-report-file=report.json -o pythonpath=.
 
     - name: Send Report to Receiver
       if: always()
       env:
         RECEIVER_URL: ${{ secrets.REPORT_RECEIVER_URL }}
       run: |
-        if [ -n "$RECEIVER_URL" ]; then
-          python -c "
-          import json, os, requests
-          report_path = 'report.json'
-          if os.path.exists(report_path):
-              with open(report_path) as f:
-                  data = json.load(f)
-              payload = {
-                  'repository': os.getenv('GITHUB_REPOSITORY'),
-                  'branch': os.getenv('GITHUB_REF_NAME'),
-                  'commit_sha': os.getenv('GITHUB_SHA'),
-                  'run_id': os.getenv('GITHUB_RUN_ID'),
-                  'timestamp': data.get('created'),
-                  'summary': {
-                      'total': data.get('summary', {}).get('total', 0),
-                      'passed': data.get('summary', {}).get('passed', 0),
-                      'failed': data.get('summary', {}).get('failed', 0),
-                      'status': 'SUCCESS' if data.get('exitcode') == 0 else 'FAILURE'
-                  },
-                  'tests': [{'name': t.get('nodeid'), 'result': t.get('outcome'), 'message': t.get('longrepr', '')} for t in data.get('tests', [])]
-              }
-              try:
-                  res = requests.post(os.getenv('RECEIVER_URL'), json=payload, timeout=10)
-                  print('Report sent successfully:', res.status_code)
-              except Exception as e:
-                  print('Failed to send report:', e)
-          else:
-              print('report.json not found!')
-          "
-        else:
-          echo "RECEIVER_URL secret not set. Skipping report transmission."
-        fi
+        python send_report.py
