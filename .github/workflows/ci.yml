@@ -4,6 +4,11 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -27,7 +32,7 @@ jobs:
       continue-on-error: true
       run: |
         pip install pytest-json-report
-        pytest --json-report --json-report-file=report.json -o pythonpath=.
+        pytest --json-report --json-report-file=report.json -o pythonpath=. || echo "TESTS_FAILED=true" >> $GITHUB_ENV
 
     - name: Send Report to Receiver
       if: always()
@@ -35,3 +40,46 @@ jobs:
         RECEIVER_URL: ${{ secrets.REPORT_RECEIVER_URL }}
       run: |
         python send_report.py
+
+    - name: Send Email Report
+      if: always()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 465
+        username: ${{ secrets.MAIL_USERNAME }}
+        password: ${{ secrets.MAIL_PASSWORD }}
+        subject: "CI Test Report - Commit ${{ github.sha }}"
+        to: ${{ secrets.MAIL_TO }}
+        from: "CI Pipeline <${{ secrets.MAIL_USERNAME }}>"
+        body: |
+          Automated CI Test Execution Report:
+          - Repository: ${{ github.repository }}
+          - Branch: ${{ github.ref_name }}
+          - Commit SHA: ${{ github.sha }}
+          - Run ID: ${{ github.run_id }}
+          - Status: Check attached report or receiver logs for details.
+        attachments: testreport.json
+
+    - name: Check Test Status for Failure
+      if: env.TESTS_FAILED == 'true'
+      run: exit 1
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
