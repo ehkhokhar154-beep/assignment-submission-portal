@@ -17,6 +17,7 @@ def test_valid_submission(client):
         'url': 'https://github.com/example/project'
     }, follow_redirects=True)
     
+    # Yeh 400 isliye rakha hai taake test fail ho aur failing demo complete ho
     assert response.status_code == 400
     assert b'Ali Khan' in response.data
     assert b'REG123' in response.data
