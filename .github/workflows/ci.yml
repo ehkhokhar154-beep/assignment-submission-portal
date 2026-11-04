@@ -15,10 +15,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
 
@@ -32,7 +32,7 @@ jobs:
       continue-on-error: true
       run: |
         pip install pytest-json-report
-        pytest --json-report --json-report-file=report.json -o pythonpath=. || echo "TESTS_FAILED=true" >> $GITHUB_ENV
+        pytest --json-report --json-report-file=testreport.json -o pythonpath=. || echo "TESTS_FAILED=true" >> $GITHUB_ENV
 
     - name: Send Report to Receiver
       if: always()
@@ -70,16 +70,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Pages
-        uses: actions/configure-pages@v3
+        uses: actions/configure-pages@v4
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
